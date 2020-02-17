@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<body style="text-align: center;">
+    <div>
+        <label for="">Ad</label>
+        <input type="text" id="cname">
+    </div>
+    <div>
+        <label for="">Açıklama</label>
+        <input type="text" id="cdescription">
+    </div>
+    <div>
+        <input type="hidden" id="hiddeninput">
+        <button id="btnekle">Ekle</button>
+        <button id="update">Güncelle</button>
+
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <td>Ad</td>
+                <td>Açıklama</td>
+                <td>İşlem</td>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</body>
+</html>
+<script>
+    GetData()
+    $(document).on("click","#btnekle",function(){
+        var category = new Object();
+        category.name = $("#cname").val();
+        category.description = $("#cdescription").val();
+
+        $.ajax({
+            url:"http://localhost:3000/category/add",
+            type:"POST",
+            data:category,
+            success:function(){
+                alert("İşlem başarılı!!");
+                GetData();
+            }
+        })
+
+    })
+
+
+    function GetData(){
+        $("tbody tr").remove();
+        $.getJSON("http://localhost:3000/category/list",function(res){
+            $.map(res,function(item){
+                $("tbody").append("<tr><td>" + item.name + "</td><td>"+item.description+"</td><td style='cursor:pointer'><button id='"+item._id+"' class='btnguncelle'>Güncelle</button></td></tr>");
+            })
+        })
+    }
+
+    $(document).on("click",".btnguncelle",function(){
+      var id =   $(this).attr('id');
+      $.getJSON('http://localhost:3000/category/categorydetail/' + id,function(result){
+          $("#cname").val(result.name);
+          $("#cdescription").val(result.description);
+          $("#hiddeninput").val(id);
+
+      })
+    });
+
+
+    $(document).on("click","#update",function(){
+        var updatedcategory = new Object();
+        updatedcategory.name = $("#cname").val();
+        updatedcategory.description = $("#cdescription").val();
+        updatedcategory.id = $("#hiddeninput").val();
+
+        $.ajax({
+            url:"http://localhost:3000/category/update",
+            type:"POST",
+            data:updatedcategory,
+            success:function(){
+                alert("Güncelleme başarılı!");
+                GetData();
+            }
+        })
+    })
+</script>
